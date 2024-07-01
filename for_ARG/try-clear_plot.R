@@ -3,20 +3,58 @@ library(ggplot2)
 library(dplyr)
 library(gridExtra)
 
+# The output from ARG
 df = fread("chr1_nomutmid_treeinfo.csv")
 head(df)
 
+# # Filter out rows where parent_start is 0 (i.e. no recombination)
 df_recomb <- df[parent_start != 0]
+
+# Cut into ranges
+#breaks <- seq(min(df_recomb$parent_start), max(df_recomb$parent_start), by = 200)
+df_recomb$range = cut(df_recomb$parent_start, breaks = 200)
+
+df_count <- df_recomb %>%
+  group_by(range) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+# Extract the breakpoints used for binning
+break_points <- levels(df_recomb$range)
+break_points <- as.numeric(gsub("[^0-9\\.e+]", "", unlist(strsplit(break_points, ","))))
+break_points <- sort(unique(break_points))
+
+#range_size <- diff(breaks)[1] # range size
+#range_size <- diff(range(df_recomb$parent_start)) / 200
+range_sizes <- diff(break_points)
+
+# Normalize the count
+# Normalize the count using the corresponding range size
+df_count <- df_count %>%
+  mutate(range_size = range_sizes[as.integer(range)],
+         normalized_count = count / (range_size * 200))
+
+# Create the ggplot
+ggplot(df_count, aes(x = range, y = normalized_count)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Normalized Count of Parent Start in Ranges",
+       x = "Range of Parent Start",
+       y = "Normalized Count (count / (range size * 200))") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
 g1 = ggplot(df_recomb, aes(parent_start)) + geom_histogram(bins=200)
 print(g1)
 
 parent_count <- df_recomb %>%
-  group_by(parent_start) %>%
+  group_by(range) %>%
   summarise(count = n()) %>%
-  arrange(parent_start)
+  arrange(range)
 
-seq_length <- 500000*100
+seq_length <- 500000
 parent_count$norm <- parent_count$count/seq_length
+
+
+
 
 # use this plot
 g2 <- ggplot(parent_count, aes(x = parent_start, y = norm)) + 
@@ -38,6 +76,30 @@ df2 <- read.csv2("recombination_rates_chr1mid.csv",sep = ",")
 
 df2$Rate <- as.numeric(df2$Rate)
 df2$Position <- as.numeric(df2$Position)
+
+# Specify the number of bins
+number_of_bins <- 200  # You can adjust this number
+
+# Cut the Position into ranges
+df2$range <- cut(df2$Position, breaks = break_points, include.lowest = TRUE)
+
+# Calculate the count of Position in each range
+df2_count <- df2 %>%
+  group_by(range) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+df2_count <- df2_count %>%
+  mutate(range_size = range_sizes[as.integer(range)],
+         normalized_count = count / (range_size * 200))
+
+# Create the ggplot
+ggplot(df2_count, aes(x = range, y = normalized_count)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Normalized Count of Position in Ranges",
+       x = "Range of Position",
+       y = "Normalized Count (count / (range size * 200))") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 g3 <- ggplot(df2, aes(x = Position, y = Rate)) +
   geom_segment(aes(x = Position, xend = Position, y = 0, yend = Rate), color = "blue", alpha = 0.8) +  # Vertical lines from x-axis to points

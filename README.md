@@ -19,5 +19,5 @@ Aim: develop statistical methods using genealogical inference techniques to esti
 - set up and run pyrho (https://github.com/popgenmethods/pyrho?tab=readme-ov-file) using the simulated data.
   - obtain a plot like Fig.1a in https://www.science.org/doi/10.1126/sciadv.aaw9206, obtaining the spearman correlation between true recombination map and inferred recombination map and compare ARG results to that of pyrho.
 
-- reconstruct ARGs from the simulated data with arg_needle and get recombination rates along the geneome.
+- reconstruct ARGs from the simulated data with arg_needle and get recombination rates along the geneome. calculate the there spearman correlation with the truth (with different window sizes).
 
