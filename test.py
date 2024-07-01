@@ -5,8 +5,6 @@ import argparse
 import gzip
 import arg_needle_lib
 import csv
-#import timeancestry as tac
-
 def create_rate_map(map_file):
     # Initialize lists to store positions and rates
     positions = [0]
@@ -17,7 +15,7 @@ def create_rate_map(map_file):
         for line in f:
             if line.strip():  # Check if line is not empty
                 parts = line.split()
-                position = float(parts[3])  # Extract position (assuming it's the third column)
+                position = float(parts[3])  # Extract position (assuming it's the fourth column)
                 positions.append(position)
                 gmap = float(parts[2])
                 gmaps.append(gmap)
@@ -37,20 +35,10 @@ def create_rate_map(map_file):
         rate=combined_rates
     )
 
-    with open("recombination_rates_chr1.csv", "w", newline='') as csvfile:
-        writer = csv.writer(csvfile)
-    
-        # Write header
-        writer.writerow(["Position", "Rate"])
-    
-        # Write data rows
-        for i in range(len(positions)-1):
-            writer.writerow([positions[i], combined_rates[i]])
-    
-    return rate_map
+    return rate_map, positions, combined_rates
 
 
-def export_output(mts, name):
+def export_output(mts, name, positions, combined_rates):
     a = arg_needle_lib.tskit_to_arg(mts)
     arg_needle_lib.serialize_arg(a, name + ".argn")
 
@@ -61,6 +49,17 @@ def export_output(mts, name):
     vcf_file = name + ".vcf"
     with open(vcf_file, "w") as vcf_out:
         mts.write_vcf(vcf_out)
+    
+    with open(name + ".csv", "w", newline='') as csvfile:
+        writer = csv.writer(csvfile)
+    
+        # Write header
+        writer.writerow(["Position", "Rate"])
+    
+        # Write data rows
+        for i in range(len(positions) - 1):
+            writer.writerow([positions[i], combined_rates[i]])
+
 
 def sim_one_const(pop_size, sample_size, rate_map, mu_rate):
     # Create a demographic model for a constant-size population
@@ -94,7 +93,17 @@ if __name__ == '__main__':
     mu_rate = float(args['mu_rate'])
     map_file = args['map_file']
     
-    rate_map = create_rate_map(map_file)
+    rate_map, positions, combined_rates = create_rate_map(map_file)
     mts = sim_one_const(pop_size, sample_size, rate_map, mu_rate)
-    export_output(mts, args['output'])
+    export_output(mts, args['output'],positions, combined_rates)
 
+# bash script
+#!/bin/bash
+#SBATCH --job-name=ARG_job
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+
+
+#source myenv/bin/activate
+# python test.py -s 100 -p 1000 -mu 1e-8 -m plink.chr1.GRCh38.map -o output_test

@@ -72,7 +72,7 @@ def create_rate_map(map_file):
     return rate_map
 
 
-def export_output(ts, name):
+def export_output(mts, name):
     a = arg_needle_lib.tskit_to_arg(mts)
     arg_needle_lib.serialize_arg(a, name + ".argn")
 
