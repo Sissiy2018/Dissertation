@@ -1,3 +1,4 @@
+#  plink2 --vcf simulation_output.vcf --make-bed --out intermediate
 PLINK v2.00a6 64-bit (25 Jun 2024)
 Options in effect:
   --out final
@@ -15,6 +16,7 @@ Using up to 20 threads (change this with --threads).
 
 End time: Wed Jul 03 11:28:48 2024
 
+# plink2 --vcf simulation_output.vcf --out final
 PLINK v2.00a6 64-bit (25 Jun 2024)
 Options in effect:
   --make-bed
