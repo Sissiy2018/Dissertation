@@ -1,0 +1,6 @@
+threads infer \
+--pgen test/simulation.pgen \
+--map_gz test/plink.chr1.GRCh38.map.gz \
+--demography test/constant_pop.demo \
+--out test/output.threads \
+--mutation_rate 1e-8

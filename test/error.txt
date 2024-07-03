@@ -1,0 +1,38 @@
+threads infer --pgen simulation_output.pgen --map_gz plink.chr1.GRCh38.map.gz -
+-demography test/constant_pop.demo --out test/output.threads --mutation_rate 1e-8
+2024-07-03 11:38:24 INFO     Note: NumExpr detected 20 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 8.
+2024-07-03 11:38:24 INFO     NumExpr defaulting to 8 threads.
+2024-07-03 11:38:24 INFO     Starting Threads-infer with the following parameters:
+2024-07-03 11:38:24 INFO       pgen:                  simulation_output.pgen
+2024-07-03 11:38:24 INFO       map_gz:                plink.chr1.GRCh38.map.gz
+2024-07-03 11:38:24 INFO       recombination_rate:    1.3e-08
+2024-07-03 11:38:24 INFO       region:                None
+2024-07-03 11:38:24 INFO       demography:            test/constant_pop.demo
+2024-07-03 11:38:24 INFO       mutation_rate:         1e-08
+2024-07-03 11:38:24 INFO       query_interval:        0.01
+2024-07-03 11:38:24 INFO       match_group_interval:  0.5
+2024-07-03 11:38:24 INFO       num_threads:           1
+2024-07-03 11:38:24 INFO       max_sample_batch_size: None
+2024-07-03 11:38:24 INFO       out:                   test/output.threads
+2024-07-03 11:38:24 INFO     Using recombination rates from plink.chr1.GRCh38.map.gz
+/home/adduser/.local/lib/python3.10/site-packages/threads_arg/utils.py:92: UserWarning: Warning: Found variants outside map range. Consider trimming input genotypes.
+  warnings.warn("Warning: Found variants outside map range. Consider trimming input genotypes.")
+Traceback (most recent call last):
+  File "/home/adduser/.local/bin/threads", line 8, in <module>
+    sys.exit(main())
+  File "/home/adduser/.local/lib/python3.10/site-packages/click/core.py", line 1157, in __call__
+    return self.main(*args, **kwargs)
+  File "/home/adduser/.local/lib/python3.10/site-packages/click/core.py", line 1078, in main
+    rv = self.invoke(ctx)
+  File "/home/adduser/.local/lib/python3.10/site-packages/click/core.py", line 1688, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+  File "/home/adduser/.local/lib/python3.10/site-packages/click/core.py", line 1434, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+  File "/home/adduser/.local/lib/python3.10/site-packages/click/core.py", line 783, in invoke
+    return __callback(*args, **kwargs)
+  File "/home/adduser/.local/lib/python3.10/site-packages/threads_arg/__main__.py", line 348, in infer
+    threads_infer(pgen, map_gz, recombination_rate, demography, mutation_rate, query_interval, match_group_interval, mode, num_threads, region, max_sample_batch_size, out)
+  File "/home/adduser/.local/lib/python3.10/site-packages/threads_arg/__main__.py", line 380, in threads_infer
+    reader = pgenlib.PgenReader(pgen.encode())
+  File "src/pgenlib/pgenlib.pyx", line 350, in pgenlib.PgenReader.__cinit__
+RuntimeError: PgenReader: multiallelic variants present, but allele_idx_offsets not provided
