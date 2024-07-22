@@ -21,7 +21,7 @@ def create_map_from_csv(csv_file, map_file):
     for i in range(1, len(positions)):
         physical_distance = positions[i] - positions[i - 1]
         rate = rates[i - 1]
-        genetic_distance = rate * physical_distance
+        genetic_distance = rate * physical_distance * 100
         cumulative_distance += genetic_distance
         genetic_positions.append(round(cumulative_distance,6))
     
