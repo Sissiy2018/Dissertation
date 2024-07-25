@@ -1,6 +1,6 @@
 hyper_data <- read.table("constant_n50_N75_Ne10000_hyperparam_results.txt", 
                     header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-hyper_data2 <- read.table("constant_n100_N125_Ne10000_hyperparam_results.txt", 
+hyper_data2 <- read.table("constant_n100_N125_Ne1000_hyperparam_results.txt", 
                          header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 
 ramp_data <- read.table("constant_n100_N125_Ne10000_map.rmap"
@@ -32,7 +32,7 @@ sample_size <- 1000
 total_obs <- nrow(df_recomb)
 
 # The true data
-df2 <- read.csv2("10Mbrates_chr22_25_Ne10000.csv",sep = ",")
+df2 <- read.csv2("20Mbrates_chr22_25_Ne500.csv",sep = ",")
 
 df2$Rate <- as.numeric(df2$Rate)
 df2$Position <- as.numeric(df2$Position)
@@ -49,7 +49,7 @@ df2$Interval <- cut(df2$Position, breaks = break_points)
 true_interval_rate <- aggregate(Rate ~ Interval, data = df2, FUN = mean, na.action = NULL)
 
 # result from pyrho
-ramp_data <- read.table("constant_n50_N75_Ne10000_map.rmap"
+ramp_data <- read.table("constant_n50_N75_Ne500_map.rmap"
                         , header = TRUE, col.names = c("Start", "End", "Pyrho"))
 ramp_data <- ramp_data %>%
   mutate(Interval = cut(Start, breaks = break_points, include.lowest = FALSE, right = TRUE))
@@ -58,7 +58,7 @@ ramp_data <- ramp_data %>%
 pyrho_interval_rate <- aggregate(Pyrho ~ Interval, data = ramp_data, FUN = mean, na.action = NULL)
 pyrho_interval_rate$Interval <- gsub("\\)", "]", pyrho_interval_rate$Interval)
 
-pyrho_interval_rate$Pyrho <- pyrho_interval_rate$Pyrho*4
+pyrho_interval_rate$Pyrho <- pyrho_interval_rate$Pyrho*2
 
 
 merged_df <- merge(true_interval_rate, pyrho_interval_rate, by = "Interval", all = TRUE)
@@ -117,4 +117,4 @@ print(g4)
 grid.arrange(g2, g3, g4,
              layout_matrix = rbind(c(1, 2),
                                    c(3, 3)),
-             top = "10Mb_25_Ne10000_Pyrho")
+             top = "20Mb_25_Ne500_Pyrho")

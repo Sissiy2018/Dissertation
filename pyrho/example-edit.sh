@@ -174,26 +174,26 @@ pyrho optimize --tablefile constant_n20_N30_Ne200_lookuptable.hdf \
 	--logfile constant_n20_N30_Ne200_optmize.log
 
 pyrho optimize --tablefile constant_n50_N75_Ne500_lookuptable.hdf \
-	--vcffile chr22_20Mb_25_Ne500.vcf \
+	--vcffile chr22_25_Ne500.vcf \
 	--outfile constant_n50_N75_Ne500_map.rmap \
 	--blockpenalty 50 --windowsize 90 --ploidy 1 \
 	--logfile constant_n50_N75_Ne500_optmize.log
 
 pyrho optimize --tablefile constant_n100_N125_Ne1000_lookuptable.hdf \
-	--vcffile chr22_20Mb_50_Ne1000.vcf \
+	--vcffile chr22_50_Ne1000.vcf \
 	--outfile constant_n100_N125_Ne1000_map.rmap \
 	--blockpenalty 50 --windowsize 50 --ploidy 1 \
 	--logfile constant_n100_N125_Ne1000_optmize.log
 
 pyrho optimize --tablefile constant_n100_N125_Ne10000_lookuptable.hdf \
-	--vcffile chr22_10Mb_100_Ne10000.vcf \
+	--vcffile chr22_50_Ne10000.vcf \
 	--outfile constant_n100_N125_Ne10000_map.rmap \
 	--blockpenalty 50 --windowsize 60 --ploidy 1 \
 	--logfile constant_n100_N125_Ne10000_optmize.log
 
 pyrho optimize --tablefile constant_n50_N75_Ne10000_lookuptable.hdf \
-	--vcffile chr22_10Mb_25_Ne10000.vcf \
-	--outfile constant_n100_N125_Ne10000_map.rmap \
+	--vcffile chr22_25_Ne10000.vcf \
+	--outfile constant_n50_N75_Ne10000_map.rmap \
 	--blockpenalty 15 --windowsize 40 --ploidy 1 \
 	--logfile constant_n50_N75_Ne10000_optmize.log
 

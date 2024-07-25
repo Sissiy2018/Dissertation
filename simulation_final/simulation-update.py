@@ -22,26 +22,30 @@ def convert_map_to_hapmap(input_map_file, output_hapmap_file):
                 rate_cM_per_Mb = "0.000000"  # Assuming a constant rate between positions
                 outfile.write(f"{chromosome}\t{position_bp}\t{rate_cM_per_Mb}\t{map_cM}\n")
 
-def create_rate_map10Mb(map_file, convert_map_file, seed=None):
+def create_rate_map20Mb(map_file, convert_map_file, seed=None):
     if seed is not None:
         random.seed(seed)
     
     # Read the HapMap format recombination map
     rate_map = msprime.RateMap.read_hapmap(convert_map_file,rate_col=None, )
     
+    print(rate_map.right)
     # Randomly select a 10Mb segment
     total_length = rate_map.right[-1] - rate_map.right[0]
-    if total_length < 10_000_000:
-        raise ValueError("Not enough data for a 10Mb segment.")
+    if total_length < 20_000_000:
+        raise ValueError("Not enough data for a 20Mb segment.")
+    
+    #print(total_length)
+    max_start_position = rate_map.right[-1] - 20_000_000
+    
+    #print(max_start_position)
+    start_position = random.choice([x for x in rate_map.left if rate_map.right[0] < x < max_start_position])
+    end_position = max((x for x in rate_map.right if x < start_position + 20_000_000), default=None)
 
-    max_start_position = total_length - 10_000_000
-    start_position = random.choice([x for x in rate_map.left if x < max_start_position])
-    end_position = max((x for x in rate_map.right if x < start_position + 10_000_000), default=None)
-
-    # Slice the map to get the 10Mb segment
+    # Slice the map to get the 20Mb segment
     sliced_rate_map = rate_map.slice(start_position, end_position, trim = True)
 
-    with open("10Mbrates_chr22_25_Ne10000.csv", "w", newline='') as csvfile:
+    with open("20Mbrates_chr22_250_Ne5000.csv", "w", newline='') as csvfile:
         writer = csv.writer(csvfile)
         # Write header
         writer.writerow(["Position", "Rate"])
@@ -74,11 +78,11 @@ def create_rate_map10Mb(map_file, convert_map_file, seed=None):
                     filtered_rows.append(line)
         
         # Write the filtered rows to the output file
-    with open('10Mbmap_chr22_25_Ne10000.map', 'w') as outfile:
+    with open('20Mbmap_chr22_250_Ne5000.map', 'w') as outfile:
         outfile.writelines(filtered_rows) 
     
     # Write the map file for thread
-    with open("10Mbmap_chr22_25_Ne10000_forthread.map", 'w') as mapfile:
+    with open("20Mbmap_chr22_250_Ne5000_forthread.map", 'w') as mapfile:
         for pos, gmap in zip(sliced_rate_map.left, genetic_positions):
             chromosome = 22
             snp_id = f"."
@@ -118,17 +122,17 @@ def sim_one_const(pop_size, sample_size, rate_map, mu_rate, seed=None):
 
 if __name__ == '__main__':
     seed = 42
-    pop_size = 10000
-    sample_size = 25
+    pop_size = 5000
+    sample_size = 250
     mu_rate = 1e-8  # Mutation rate per base pair per generation
     map_file = 'plink.chr22.GRCh38.map'
     convert_map_file = 'chr22_transform.map'
-    output_prefix = 'chr22_10Mb_25_Ne10000'
+    output_prefix = 'chr22_250_Ne5000'
 
     convert_map_file = convert_map_to_hapmap(map_file, convert_map_file)
 
     print("Creating rate map...")
-    rate_map = create_rate_map10Mb(map_file, convert_map_file, seed)
+    rate_map = create_rate_map20Mb(map_file, 'chr22_transform.map', seed)
     
     print("Running the simulation...")
     mts = sim_one_const(pop_size, sample_size, rate_map, mu_rate, seed)
