@@ -29,21 +29,28 @@ def create_rate_map20Mb(map_file, convert_map_file, output_prefix, stage_number,
     # Slice the map to get the 20Mb segment
     sliced_rate_map = rate_map.slice(start_position, end_position, trim = True)
 
+    new_left = [sliced_rate_map.right[-1], 20_000_000]
+    new_position = np.append(sliced_rate_map.left, new_left)
+
+    new_rate = np.append(sliced_rate_map.rate, 2e-08) 
+
+    new_rate_map = msprime.RateMap(position = new_position, rate = new_rate)
+
     csv_filename = f"{output_prefix}_stage{stage_number}.csv"
     with open(csv_filename, "w", newline='') as csvfile:
         writer = csv.writer(csvfile)
         # Write header
         writer.writerow(["Position", "Rate"])
         # Write data rows
-        for pos, rate in zip(sliced_rate_map.left, sliced_rate_map.rate):
+        for pos, rate in zip(new_rate_map.left, new_rate_map.rate):
             writer.writerow([pos, rate])
     
     # Calculate genetic positions based on rates
     genetic_positions = [0]
     cumulative_distance = 0
-    for i in range(0, len(sliced_rate_map.left)):
-        physical_distance = sliced_rate_map.span[i]
-        rate = sliced_rate_map.rate[i]
+    for i in range(0, len(new_rate_map.left)):
+        physical_distance = new_rate_map.span[i]
+        rate = new_rate_map.rate[i]
         genetic_distance = rate * physical_distance * 100
         cumulative_distance += genetic_distance
         genetic_positions.append(round(cumulative_distance, 6))
@@ -70,14 +77,14 @@ def create_rate_map20Mb(map_file, convert_map_file, output_prefix, stage_number,
     thread_map_filename = f'{output_prefix}_stage{stage_number}_forthread.map'
     # Write the map file for thread
     with open(thread_map_filename, 'w') as mapfile:
-        for pos, gmap in zip(sliced_rate_map.left, genetic_positions):
+        for pos, gmap in zip(new_rate_map.left, genetic_positions):
             chromosome = 22
             snp_id = f"."
             genetic_distance = gmap
             physical_position = pos
             mapfile.write(f"{chromosome}\t{snp_id}\t{genetic_distance}\t{physical_position}\n")
     
-    return sliced_rate_map
+    return new_rate_map
 
 def export_vcf(mts, name):
     # Output VCF (Variant Call Format) file
@@ -93,16 +100,32 @@ def sim_epoch(pop_size, sample_size, rate_map, mu_rate, start_time, end_time, in
     demographic_model = msprime.Demography()
     demographic_model.add_population(initial_size=pop_size)
     
-    # Simulate the tree sequence for the epoch
-    ts = msprime.sim_ancestry(
-        samples=sample_size, 
-        demography=demographic_model, 
-        recombination_rate=rate_map,
-        ploidy=2,
-        random_seed=seed,
-        start_time=start_time,
-        end_time=end_time
-    )
+    if initial_state is not None:
+        # Continue the simulation from the provided initial state
+        ts = msprime.sim_ancestry(
+            #sequence_length = 20_000_000,
+            initial_state=initial_state,
+            demography=demographic_model, 
+            #recombination_rate=2e-08,
+            recombination_rate = rate_map,
+            ploidy=2,
+            random_seed=seed,
+            start_time=start_time,
+            end_time=end_time
+        )
+    else:
+        # Simulate the tree sequence for the epoch from scratch
+        ts = msprime.sim_ancestry(
+            #sequence_length = 20_000_000,
+            samples=sample_size, 
+            demography=demographic_model, 
+            #recombination_rate=2e-08,
+            recombination_rate = rate_map,
+            ploidy=2,
+            random_seed=seed,
+            start_time=start_time,
+            end_time=end_time
+        )
     
     # Simulate mutations
     mts = msprime.sim_mutations(ts, rate=mu_rate, random_seed=seed)
@@ -110,13 +133,13 @@ def sim_epoch(pop_size, sample_size, rate_map, mu_rate, start_time, end_time, in
     return mts
 
 if __name__ == '__main__':
-    seed = 42
+    seed = 123
     pop_size = 10000
     sample_size = 500
     mu_rate = 1e-8  # Mutation rate per base pair per generation
     map_file = 'plink.chr22.GRCh38.map'
     convert_map_file = 'chr22_transform.map'
-    output_prefix = f'chr22_500_Ne10000'
+    output_prefix = f'constant_chr22_500_Ne10000'
 
     print("Creating rate map for first epoch...")
     rate_map1 = create_rate_map20Mb(map_file, convert_map_file, output_prefix, 1, seed=seed)
